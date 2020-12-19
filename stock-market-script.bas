@@ -65,7 +65,15 @@ Sub StockMarket()
         ws.Range("O2").Value = "Greatest % Increase"
         ws.Range("O3").Value = "Greatest % Decrease"
         ws.Range("O4").Value = "Greatest Total Volume"
-             
+        
+        ' change column and row headers of Summary Table to Bold type
+        ws.Range("I1:Q1").Font.Bold = True
+        ws.Range("O2:O4").Font.Bold = True
+        
+        ' add autofit column width formatting to the Headers
+        ' ws.Range("I:Q").Columns.AutoFit
+            ' --> move to the end after data fill in
+        
         
         '------------------------------------------------
             ' Loop through all <tickers> rows and output
@@ -231,6 +239,13 @@ Sub StockMarket()
             End If
                 
         Next sumTbl_row_num
+        
+        '---------------------------------------
+        ' change columns width by autofit format
+        '---------------------------------------
+        
+        ' add autofit column width formatting to the columns of Summary Tables
+        ws.Range("I:Q").Columns.AutoFit
         
         
         '----------------------------------
