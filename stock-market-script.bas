@@ -10,7 +10,8 @@ Sub StockMarket()
     
     ' Loop through all of the worksheets in the active workbook
     For Each ws In Worksheets
-
+        'MsgBox ws.Name
+        
 
         '----------------------------------
         ' Declaire and initialize variables
@@ -19,7 +20,6 @@ Sub StockMarket()
         Dim row_num As Double
         Dim lastRow As Double
         lastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
-            'MsgBox ws.Name  ' This line displays the worksheet name in a message box
             'MsgBox (lastRow)
             
                        
@@ -49,19 +49,30 @@ Sub StockMarket()
         ' Create Summary Table Headers
         '------------------------------
             
-        ' add Column Headers: Ticker / Yearly Change / Percent Change / Total Stock Volume
+        ' add Column Headers: Ticker | Yearly Change | Percent Change | Total Stock Volume
         ws.Range("I1").Value = "Ticker"
         ws.Range("J1").Value = "Yearly Change"
         ws.Range("K1").Value = "Percent Change"
         ws.Range("L1").Value = "Total Stock Volume"
         
         
+        ' Create Headers for columns and rows of "Bonus part" Summary Table
+        ' add Column names: Ticker | Value to columns 'P' and 'Q'
+        ws.Range("P1").Value = "Ticker"
+        ws.Range("Q1").Value = "Value"
+
+        ' add Row names
+        ws.Range("O2").Value = "Greatest % Increase"
+        ws.Range("O3").Value = "Greatest % Decrease"
+        ws.Range("O4").Value = "Greatest Total Volume"
+             
+        
         '------------------------------------------------
             ' Loop through all <tickers> rows and output
-            '  -- Output Ticker Symbol
-            '  -- Output Total stock volume
-            '  -- Output Yearly Change
-            '  -- Output Percent Change
+            '  -- Ticker Symbol
+            '  -- Yearly Change
+            '  -- Percent Change
+            '  -- Total stock volume
         '-------------------------------------------------
         
         
@@ -72,7 +83,7 @@ Sub StockMarket()
         For row_num = 2 To lastRow
         
         ' check if we are still within the same ticker name
-            ' if it's not
+            ' if it's not:
             
              If ws.Cells(row_num + 1, 1).Value <> ws.Cells(row_num, 1).Value Then
              
@@ -99,7 +110,10 @@ Sub StockMarket()
                 ' add to the Summary Table
                 ws.Range("J" & summary_table_row).Value = yearlyChange
      
-                    ' apply conditional formatting to "Yearly Change" column to highlight
+                    '----------------------------
+                    '   conditional formatting
+                    '----------------------------
+                    ' apply conditional formatting to 'Yearly Change' column to highlight
                     ' -- positive change in Green (4)
                     ' -- negative change in Red (3)
                     
@@ -153,14 +167,85 @@ Sub StockMarket()
             End If
             
         Next row_num
-
-'     ' *for testing purposes only
-'        ' clear contents and formatting for all added columns
-'        ws.Range("I:L").ClearContents
-'        ws.Range("I:L").ClearFormats
         
+        '------------------
+        ' Bonus Part
+        '------------------
+        
+        Dim sumTbl_lastRow As Double    ' determine last row in Summary Table
+        Dim sumTbl_row_num As Double    ' counter for Summary Table rows
+
+   
+        '----------------------------------------------------------------------
+        ' Analyze resulting data in the Summary Table to find out stocks with:
+        '   -- the Greatest % Increase
+        '   -- the Greatest % Decrease
+        '   -- the Greatest Total Volume
+        '----------------------------------------------------------------------
+
+
+        sumTbl_lastRow = ws.Cells(Rows.Count, "I").End(xlUp).Row
     
+        
+        For sumTbl_row_num = 2 To sumTbl_lastRow
+        
+          ' check if the value of current cell in 'Percent Change' column of Summary Table
+            ' a) is maximum
+            If ws.Cells(sumTbl_row_num, "K").Value = WorksheetFunction.Max(ws.Range("K2:K" & sumTbl_lastRow)) Then
+                
+                ' enter the ticker symbol for corresponding value on the 'Greatest % Increase' line of column 'Ticker' ('P')
+                ws.Cells(2, "P") = ws.Cells(sumTbl_row_num, "I").Value
+                                                              
+                ' change formatting to %
+                ws.Cells(2, "Q").NumberFormat = "0.00%"
+                
+                ' enter Percent Change maximum value on the 'Greatest % Increase' line of column 'Value' ('Q')
+                ws.Cells(2, "Q").Value = WorksheetFunction.Max(ws.Range("K2:K" & sumTbl_lastRow))
+                
+                
+            ' b) is minimum
+            ElseIf ws.Cells(sumTbl_row_num, "K").Value = WorksheetFunction.Min(ws.Range("K2:K" & sumTbl_lastRow)) Then
+            
+                ' enter the ticker symbol for corresponding value on the 'Greatest % Decrease' line of column 'Ticker' ('P')
+                ws.Cells(3, "P") = ws.Cells(sumTbl_row_num, "I").Value
+                
+                ' change formatting to %
+                ws.Cells(3, "Q").NumberFormat = "0.00%"
+                
+                ' enter Percent Change minimum value on the 'Greatest % Decrease' line of column 'Value' ('Q')
+                ws.Cells(3, "Q").Value = WorksheetFunction.Min(ws.Range("K2:K" & sumTbl_lastRow))
+
+            ' if not a) or b)
+            ' check if value of current cell in 'Total Stock Volume' column of Summary Table is maximum
+            ElseIf ws.Cells(sumTbl_row_num, "L").Value = WorksheetFunction.Max(ws.Range("L2:L" & sumTbl_lastRow)) Then
+            
+                ' enter the ticker symbol for corresponding value on the 'Greatest Total Volume' line of column 'Ticker' ('P')
+                ws.Cells(4, "P") = ws.Cells(sumTbl_row_num, "I").Value
+                
+                ' change formatting to "scientific"
+                ws.Cells(4, "Q").NumberFormat = "0.0000E+00"
+                
+                ' enter Total Volume maximum value on the 'Greatest Total Volume' line of column 'Value' ('Q')
+                ws.Cells(4, "Q").Value = WorksheetFunction.Max(ws.Range("L2:L" & sumTbl_lastRow))
+                        
+            End If
+                
+        Next sumTbl_row_num
+        
+        
+        '----------------------------------
+        ' *-- use for testing purposes only
+        '----------------------------------
+
+'        ' clear all contents and formatting for added columns
+'        ws.Range("I:Q").ClearContents
+'        ws.Range("I:Q").ClearFormats
+              
+
+
     Next ws
-    
 
 End Sub
+
+    
+
